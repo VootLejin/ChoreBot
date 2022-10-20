@@ -98,6 +98,7 @@ namespace ChoreBot
             var testCommand = new SlashCommandBuilder();
             testCommand.WithName("test");
             testCommand.WithDescription("A test command to see what happens");
+            testCommand.WithDefaultPermission(true);
 
             try
             {
