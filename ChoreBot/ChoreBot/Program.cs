@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Windows.Input;
@@ -90,29 +91,33 @@ namespace ChoreBot
             // Subscribe a handler to see if a message invokes a command.
             //_client.MessageReceived += HandleCommandAsync;
             _client.Connected += Client_Ready;
-            _client.SlashCommandExecuted+= HandleCommandAsync;
+            //_client.SlashCommandExecuted+= HandleCommandAsync;
         }
 
+        List<ApplicationCommandProperties> ApplicationCommandProperties = new List<ApplicationCommandProperties>();
         public async Task Client_Ready()
         {
-            var testCommand = new SlashCommandBuilder();
-            testCommand.WithName("test");
-            testCommand.WithDescription("A test command to see what happens");
-            testCommand.WithDefaultPermission(true);
+            var commands = _services.GetServices<IDiscordCommand>();
+            ApplicationCommandProperties = new List<ApplicationCommandProperties>(commands.Select(c => c.BuildCommand()).ToList());
 
             try
             {
-                await _client.CreateGlobalApplicationCommandAsync(testCommand.Build());
+                await _client.BulkOverwriteGlobalApplicationCommandsAsync(ApplicationCommandProperties.ToArray());
             }
             catch (HttpException exception)
             {
-                // If our command was invalid, we should catch an ApplicationCommandException. This exception contains the path of the error as well as the error message. You can serialize the Error field in the exception to get a visual of where your error is.
+                // If our command was invalid, we should catch an ApplicationCommandException.
+                // This exception contains the path of the error as well as the error message.
+                // You can serialize the Error field in the exception to get a visual of where your error is.
                 var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
 
                 // You can send this error somewhere or just print it to the console, for this example we're just going to print it.
                 Console.WriteLine(json);
             }
-
+            foreach (var command in commands)
+            {
+                _client.SlashCommandExecuted += command.HandleSlashCommandAsync;
+            }
         }
 
         // If any services require the client, or the CommandService, or something else you keep on hand,
@@ -123,7 +128,8 @@ namespace ChoreBot
             var map = new ServiceCollection()
                 // Repeat this for all the service classes
                 // and other dependencies that your commands might need.
-                .AddSingleton<CommandHandler>();
+                .AddSingleton<IDiscordCommand, TestCommand>()
+                .AddSingleton<IDiscordCommand, EchoCommand>();
 
             // When all your required services are in the collection, build the container.
             // Tip: There's an overload taking in a 'validateScopes' bool to make sure
@@ -133,6 +139,7 @@ namespace ChoreBot
 
         private async Task HandleCommandAsync(SocketSlashCommand command)
         {
+
             await command.RespondAsync($"You executed {command.Data.Name}");
         }
 
