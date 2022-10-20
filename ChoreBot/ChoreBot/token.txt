@@ -1,1 +1,1 @@
-﻿BadToken
+﻿otherbadtoken
