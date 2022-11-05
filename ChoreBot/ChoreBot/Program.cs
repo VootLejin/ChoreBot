@@ -3,10 +3,8 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace ChoreBot
 {
@@ -52,7 +50,7 @@ namespace ChoreBot
             _commands.Log += Log;
 
             // Setup your DI container.
-            _services = ConfigureServices();
+            _services = ServiceCollector.ConfigureServices();
         }
 
         public static Task Main(string[] args)
@@ -98,8 +96,22 @@ namespace ChoreBot
         public async Task Client_Ready()
         {
             var commands = _services.GetServices<IDiscordCommand>();
-            ApplicationCommandProperties = new List<ApplicationCommandProperties>(commands.Select(c => c.BuildCommand()).ToList());
 
+            await ReadyCommands(commands);
+            AttachCommandListeners(commands);
+        }
+
+        private void AttachCommandListeners(IEnumerable<IDiscordCommand> commands)
+        {
+            foreach (var command in commands)
+            {
+                _client.SlashCommandExecuted += command.HandleSlashCommandAsync;
+            }
+        }
+
+        private async Task ReadyCommands(IEnumerable<IDiscordCommand> commands)
+        {
+            ApplicationCommandProperties = new List<ApplicationCommandProperties>(commands.Select(c => c.BuildCommand()).ToList());
             try
             {
                 await _client.BulkOverwriteGlobalApplicationCommandsAsync(ApplicationCommandProperties.ToArray());
@@ -114,33 +126,6 @@ namespace ChoreBot
                 // You can send this error somewhere or just print it to the console, for this example we're just going to print it.
                 Console.WriteLine(json);
             }
-            foreach (var command in commands)
-            {
-                _client.SlashCommandExecuted += command.HandleSlashCommandAsync;
-            }
-        }
-
-        // If any services require the client, or the CommandService, or something else you keep on hand,
-        // pass them as parameters into this method as needed.
-        // If this method is getting pretty long, you can seperate it out into another file using partials.
-        private static IServiceProvider ConfigureServices()
-        {
-            var map = new ServiceCollection()
-                // Repeat this for all the service classes
-                // and other dependencies that your commands might need.
-                .AddSingleton<IDiscordCommand, TestCommand>()
-                .AddSingleton<IDiscordCommand, EchoCommand>();
-
-            // When all your required services are in the collection, build the container.
-            // Tip: There's an overload taking in a 'validateScopes' bool to make sure
-            // you haven't made any mistakes in your dependency graph.
-            return map.BuildServiceProvider();
-        }
-
-        private async Task HandleCommandAsync(SocketSlashCommand command)
-        {
-
-            await command.RespondAsync($"You executed {command.Data.Name}");
         }
 
         private static string GetBotToken()
