@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ChoreBot.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChoreBot
 {

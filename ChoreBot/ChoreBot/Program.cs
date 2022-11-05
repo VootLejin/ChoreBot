@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using ChoreBot.Commands;
+using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
