@@ -15,6 +15,7 @@ namespace ChoreBot
                 // Repeat this for all the service classes
                 // and other dependencies that your commands might need.
                 .AddSingleton<IDiscordCommand, TestCommand>()
+                .AddSingleton<IDiscordCommand, TestPingCommand>()
                 .AddSingleton<IDiscordCommand, EchoCommand>();
 
             // When all your required services are in the collection, build the container.
