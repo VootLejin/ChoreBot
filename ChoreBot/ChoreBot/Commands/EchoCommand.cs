@@ -1,15 +1,15 @@
 ﻿using Discord;
 using Discord.WebSocket;
 
-namespace ChoreBot
+namespace ChoreBot.Commands
 {
-    public class EchoCommand : IDiscordCommand
+    public class EchoCommand : BaseDiscordCommand
     {
-        public string Name => "echo";
+        public override string Name => "echo";
 
-        public string Description => "echo the given text";
+        public override string Description => "echo the given text";
 
-        public ApplicationCommandProperties BuildCommand()
+        public override ApplicationCommandProperties BuildCommand()
         {
             SlashCommandOptionBuilder slashCommandOptionBuilder = new();
             slashCommandOptionBuilder.WithName("text");
@@ -25,12 +25,8 @@ namespace ChoreBot
             return echoCommandBuilder.Build();
         }
 
-        public async Task HandleSlashCommandAsync(SocketSlashCommand command)
+        protected override async Task RunCommandAsync(SocketSlashCommand command)
         {
-            if (command.Data.Name != Name)
-            {
-                return;
-            }
             await command.RespondAsync($"{command.Data.Options.First().Value}");
         }
     }
