@@ -49,9 +49,11 @@ namespace ChoreBot
             // Subscribe the logging handler to both the client and the CommandService.
             _client.Log += Log;
             _commands.Log += Log;
+            _timedMessages = new TimedMessages(_client);
+
 
             // Setup your DI container.
-            _services = ServiceCollector.ConfigureServices();
+            _services = ServiceCollector.ConfigureServices(_timedMessages);
         }
 
         public static Task Main(string[] args)
@@ -70,6 +72,8 @@ namespace ChoreBot
             // Login and connect.
             await _client.LoginAsync(TokenType.Bot,
                 GetBotToken());
+
+
             await _client.StartAsync();
 
             // Wait infinitely so your bot actually stays connected.
@@ -94,6 +98,8 @@ namespace ChoreBot
         }
 
         List<ApplicationCommandProperties> ApplicationCommandProperties = new List<ApplicationCommandProperties>();
+        private TimedMessages _timedMessages;
+
         public async Task Client_Ready()
         {
             var commands = _services.GetServices<IDiscordCommand>();
