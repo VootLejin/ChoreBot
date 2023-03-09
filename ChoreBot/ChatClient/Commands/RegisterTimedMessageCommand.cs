@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChoreBot.Commands
+namespace ChatClient.Commands
 {
     public class RegisterTimedMessageCommand : BaseDiscordCommand
     {

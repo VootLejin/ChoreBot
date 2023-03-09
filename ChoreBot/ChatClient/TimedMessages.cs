@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChoreBot
+namespace ChatClient
 {
     public class TimedMessages
     {

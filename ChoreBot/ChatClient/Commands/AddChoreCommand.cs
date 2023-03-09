@@ -1,5 +1,5 @@
-﻿using Discord;
-using Discord.Rest;
+﻿using Core.Interfaces;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -8,48 +8,53 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ChoreBot.Commands
+namespace ChatClient.Commands
 {
-    internal class TestPingCommand : BaseDiscordCommand
+    internal class AddChoreCommand : BaseDiscordCommand
     {
         private const int targetArguementIndex = 0;
         private const int messageArguementIndex = 1;
+        private readonly IChoreService _choreService;
 
-        public override string Name => "ping";
+        public AddChoreCommand(IChoreService choreService)
+        {
+            _choreService = choreService;
+        }
 
-        public override string Description => "Ping someone";
+        public override string Name => "add-chore";
+
+        public override string Description => "assign a chore to someone";
 
         public override ApplicationCommandProperties BuildCommand()
         {
             SlashCommandOptionBuilder targetCommandOptionBuilder = new();
             targetCommandOptionBuilder.WithName("target");
             targetCommandOptionBuilder.WithType(ApplicationCommandOptionType.String);
-            targetCommandOptionBuilder.WithDescription("Target to Ping");
+            targetCommandOptionBuilder.WithDescription("Who to assign the chore to");
             targetCommandOptionBuilder.WithRequired(true); // Only add this if you want it to be required
-            
+
             SlashCommandOptionBuilder messageOptionBuilder = new();
-            messageOptionBuilder.WithName("message");
+            messageOptionBuilder.WithName("description");
             messageOptionBuilder.WithType(ApplicationCommandOptionType.String);
-            messageOptionBuilder.WithDescription("Message for Target");
+            messageOptionBuilder.WithDescription("description of the chore");
 
-            var pingCommandBuilder = new SlashCommandBuilder();
-            pingCommandBuilder.WithName(Name);
-            pingCommandBuilder.WithDescription(Description);
-            pingCommandBuilder.AddOptions(targetCommandOptionBuilder, messageOptionBuilder);
+            var addChoreCommandBuilder = new SlashCommandBuilder();
+            addChoreCommandBuilder.WithName(Name);
+            addChoreCommandBuilder.WithDescription(Description);
+            addChoreCommandBuilder.AddOptions(targetCommandOptionBuilder, messageOptionBuilder);
 
-            return pingCommandBuilder.Build();
+            return addChoreCommandBuilder.Build();
         }
 
         protected override async Task RunCommandAsync(SocketSlashCommand command)
         {
-            
             var options = command.Data.Options.ToList();
             var userTarget = (string)options[targetArguementIndex].Value ?? string.Empty;
 
             var users = await command.Channel.GetUsersAsync().FlattenAsync();
             var userWithName = users.SingleOrDefault(user => user.Username == userTarget);
-            
-            var isUserNameAMention = IsMention(userTarget);
+
+            var isUserNameAMention = Mentions.IsMention(userTarget);
             var isActiveUser = userWithName is not null;
             var userFound = isActiveUser || isUserNameAMention;
             if (!userFound)
@@ -61,7 +66,7 @@ namespace ChoreBot.Commands
             var userNameToMention = string.Empty;
             if (isActiveUser)
             {
-                userNameToMention = userWithName?.Mention;
+                userNameToMention = userWithName.Mention;
             }
             else if (isUserNameAMention)
             {
@@ -69,21 +74,16 @@ namespace ChoreBot.Commands
             }
 
             //if message present send it as well
-            string messageArgument = BuildMessageFromArgument(options);
-            var message = string.Join(' ', userNameToMention, messageArgument).Trim();
+            string messageArgument = ExtractChoreDescription(options);
+            await _choreService.AddChoreAsync(userNameToMention, messageArgument);
 
-            await command.RespondAsync(message);
+            //var message = string.Join(' ', userNameToMention, messageArgument).Trim();
 
+            await command.RespondAsync($"chore added for {userWithName?.Username ?? "<null>"}");
         }
 
 
-        private Regex MentionSyntax = new Regex("^<@.*>");
-        private bool IsMention(string userTarget)
-        {
-            return MentionSyntax.IsMatch(userTarget);
-        }
-
-        private string BuildMessageFromArgument(List<SocketSlashCommandDataOption> options)
+        private string ExtractChoreDescription(List<SocketSlashCommandDataOption> options)
         {
             string messageArguement = string.Empty;
             try

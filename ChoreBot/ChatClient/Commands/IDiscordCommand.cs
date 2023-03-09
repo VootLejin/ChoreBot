@@ -1,9 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
 
-namespace ChoreBot.Commands
+namespace ChatClient.Commands
 {
-    internal interface IDiscordCommand
+    public interface IDiscordCommand
     {
         string Name { get; }
         string Description { get; }

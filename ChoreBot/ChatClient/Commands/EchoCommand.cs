@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 
-namespace ChoreBot.Commands
+namespace ChatClient.Commands
 {
     public class EchoCommand : BaseDiscordCommand
     {
