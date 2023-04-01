@@ -97,6 +97,7 @@ namespace ChatClient.Commands
             catch
             {
                 // message doesnt exist
+
             }
 
             return messageArguement;
