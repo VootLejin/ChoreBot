@@ -1,4 +1,5 @@
 ﻿using ChatClient.Commands;
+using Core.Interfaces;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -10,18 +11,17 @@ using System.Windows.Input;
 
 namespace ChatClient
 {
-    public class DiscordChatClient
+    public class DiscordChatClient : IChatClient
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         //private TimedMessages _timedMessages;
-        private readonly IServiceProvider _services;
+        private IServiceProvider _services;
         private bool _isConnected = false;
         private List<ApplicationCommandProperties> ApplicationCommandProperties = new List<ApplicationCommandProperties>();
 
-        public DiscordChatClient(IServiceProvider services)
+        public DiscordChatClient()
         {
-            _services = services;
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 // How much logging do you want to see?
@@ -54,8 +54,9 @@ namespace ChatClient
             //_timedMessages = new TimedMessages(_client);
         }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(IServiceProvider services)
         {
+            _services = services;
 
             // Centralize the logic for commands into a separate method.
             await InitCommands();
@@ -79,6 +80,7 @@ namespace ChatClient
             // You also need to pass your 'IServiceProvider' instance now,
             // so make sure that's done before you get here.
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+
             // Or add Modules manually if you prefer to be a little more explicit:
             // await _commands.AddModuleAsync<SomeModule>(_services);
             // Note that the first one is 'Modules' (plural) and the second is 'Module' (singular).
@@ -139,6 +141,12 @@ namespace ChatClient
             {
                 _client.SlashCommandExecuted += command.HandleSlashCommandAsync;
             }
+        }
+
+        public async Task SendMessageAsync(string assignee, string description, ulong channelId)
+        {
+            var channel = await _client.GetChannelAsync(channelId) as IMessageChannel;
+            await channel.SendMessageAsync($"{assignee} {description}");
         }
     }
 }

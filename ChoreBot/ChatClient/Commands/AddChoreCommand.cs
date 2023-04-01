@@ -51,37 +51,37 @@ namespace ChatClient.Commands
             var options = command.Data.Options.ToList();
             var userTarget = (string)options[targetArguementIndex].Value ?? string.Empty;
 
-            var users = await command.Channel.GetUsersAsync().FlattenAsync();
-            var userWithName = users.SingleOrDefault(user => user.Username == userTarget);
+            var discordUser = await FindDiscordUserAsync(userTarget, command);
 
-            var isUserNameAMention = Mentions.IsMention(userTarget);
-            var isActiveUser = userWithName is not null;
-            var userFound = isActiveUser || isUserNameAMention;
-            if (!userFound)
+            if (discordUser is null)
             {
                 await command.RespondAsync($"Could not find user: {userTarget} (Try using an @Mention)");
                 return;
             }
 
-            var userNameToMention = string.Empty;
-            if (isActiveUser)
-            {
-                userNameToMention = userWithName.Mention;
-            }
-            else if (isUserNameAMention)
-            {
-                userNameToMention = userTarget;
-            }
+            var userNameToMention = discordUser.Mention;
 
             //if message present send it as well
             string messageArgument = ExtractChoreDescription(options);
-            await _choreService.AddChoreAsync(userNameToMention, messageArgument);
+            await _choreService.AddChoreAsync(userNameToMention, messageArgument, command.ChannelId.Value);
 
-            //var message = string.Join(' ', userNameToMention, messageArgument).Trim();
-
-            await command.RespondAsync($"chore added for {userWithName?.Username ?? "<null>"}");
+            await command.RespondAsync($"chore added for {discordUser.Username}");
         }
 
+        private async Task<IUser?> FindDiscordUserAsync(string userTarget, SocketSlashCommand command)
+        {
+            var isUserNameAMention = Mentions.IsMention(userTarget);
+            var users = await command.Channel.GetUsersAsync().FlattenAsync();
+
+            if (isUserNameAMention)
+            {
+                var userId = userTarget.Replace(@"<@", string.Empty).Replace(@">", string.Empty);
+                var userIdAsUlong = ulong.Parse(userId);
+                return users.SingleOrDefault(user => user.Id == userIdAsUlong);
+            }
+            return users.SingleOrDefault(user => user.Username == userTarget);
+
+        }
 
         private string ExtractChoreDescription(List<SocketSlashCommandDataOption> options)
         {

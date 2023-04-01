@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CalendarSystem\CalendarSystem.csproj" />
     <ProjectReference Include="..\ChatClient\ChatClient.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>

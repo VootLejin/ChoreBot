@@ -8,6 +8,7 @@ namespace Core.Interfaces
 {
     public interface IChoreService
     {
-        Task AddChoreAsync(string assignee, string description);
+        Task AddChoreAsync(string assignee, string description, ulong channelId);
+        Task RemindAsync(Guid choreToSchedule);
     }
 }

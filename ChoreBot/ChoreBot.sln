@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatClient", "ChatClient\Ch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{856129F9-A72C-4B73-A999-889B450CAA96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarSystem", "CalendarSystem\CalendarSystem.csproj", "{9D69B2F1-FE10-4039-81A5-66BB8A491169}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{856129F9-A72C-4B73-A999-889B450CAA96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{856129F9-A72C-4B73-A999-889B450CAA96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{856129F9-A72C-4B73-A999-889B450CAA96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D69B2F1-FE10-4039-81A5-66BB8A491169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D69B2F1-FE10-4039-81A5-66BB8A491169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D69B2F1-FE10-4039-81A5-66BB8A491169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D69B2F1-FE10-4039-81A5-66BB8A491169}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

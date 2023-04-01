@@ -1,4 +1,5 @@
-﻿using ChatClient;
+﻿using CalendarSystem;
+using ChatClient;
 using Core.Interfaces;
 using Discord;
 using Discord.Commands;
@@ -20,15 +21,22 @@ namespace ChoreBot
         {
             // Setup your DI container.
             //_timedMessages = new TimedMessages(_client);
+            _chatClient = new DiscordChatClient();
+
             var serviceCollection = ServiceCollector.ConfigureChatClientServices();
             ConfigureChoreBotServices(serviceCollection);
+            serviceCollection
+                .ConfigureCalanderSystemService()
+                .AddSingleton<IChatClient>(_chatClient);
+
             _services = serviceCollection.BuildServiceProvider();
-            _chatClient = new DiscordChatClient(_services);
         }
 
         private void ConfigureChoreBotServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSingleton<ChoreRepo>();
             serviceCollection.AddSingleton<IChoreService, ChoreService>();
+            serviceCollection.AddSingleton<Lazy<IChoreService>>(provider => new Lazy<IChoreService>(provider.GetService<IChoreService>));
         }
 
         public static Task Main(string[] args)
@@ -40,7 +48,7 @@ namespace ChoreBot
 
         public async Task MainAsync()
         {
-            await _chatClient.InitializeAsync();
+            await _chatClient.InitializeAsync(_services);
 
             // Wait infinitely so your bot actually stays connected.
             await Task.Delay(Timeout.Infinite);

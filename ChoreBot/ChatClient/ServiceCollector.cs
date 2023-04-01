@@ -1,4 +1,5 @@
 ﻿using ChatClient.Commands;
+using Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatClient
