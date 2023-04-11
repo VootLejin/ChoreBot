@@ -35,6 +35,7 @@ namespace ChatClient
                 .AddSingleton<IDiscordCommand, TestCommand>()
                 .AddSingleton<IDiscordCommand, TestPingCommand>()
                 .AddSingleton<IDiscordCommand, AddChoreCommand>()
+                .AddSingleton<IDiscordCommand, EndChoreCommand>()
                 //.AddSingleton<IDiscordCommand, RegisterTimedMessageCommand>()
                 .AddSingleton<IDiscordCommand, EchoCommand>();
 

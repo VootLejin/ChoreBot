@@ -19,6 +19,7 @@ namespace ChatClient
         private IServiceProvider _services;
         private bool _isConnected = false;
         private List<ApplicationCommandProperties> ApplicationCommandProperties = new List<ApplicationCommandProperties>();
+        private DiscordClientHandler _discordClientHandler;
 
         public DiscordChatClient()
         {
@@ -107,6 +108,8 @@ namespace ChatClient
 
             await ReadyCommands(commands);
             AttachCommandListeners(commands);
+
+            _discordClientHandler = new DiscordClientHandler(_client, _services.GetService<IChoreService>());
             _isConnected = true;
         }
 

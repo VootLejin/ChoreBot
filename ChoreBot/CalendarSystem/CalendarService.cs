@@ -24,7 +24,31 @@ namespace CalendarSystem
         public async Task ScheduleChoreAsync(Chore choreToSchedule)
         {
             var id = choreToSchedule.Id;
-            _backgroundJobClient.Enqueue(() => _choreService.Value.RemindAsync(id));
+            //_backgroundJobClient.Enqueue(() => _choreService.Value.RemindAsync(id));
+            var jobId = _backgroundJobClient.Schedule(() => _choreService.Value.RemindAsync(id), choreToSchedule.DueTime);
+            choreToSchedule.JobId = jobId;
+            _backgroundJobClient.ContinueJobWith(jobId, () => ScheduleChoreReminderAsync(id, TimeSpan.FromMinutes(1)));
+        }
+
+
+        public async Task ScheduleChoreReminderAsync(Guid choreId, TimeSpan reminderInterval)
+        {
+            var choreToSchedule = await _choreService.Value.GetChoreAsync(choreId);
+            if (choreToSchedule == null)
+            {
+                return;
+            }
+
+            if (choreToSchedule.Complete)
+            {
+                await _choreService.Value.RemoveChore(choreToSchedule);
+                return;
+            }
+            var id = choreToSchedule.Id;
+            //_backgroundJobClient.Enqueue(() => _choreService.Value.RemindAsync(id));
+            var jobId = _backgroundJobClient.Schedule(() => _choreService.Value.RemindAsync(id), reminderInterval);
+            choreToSchedule.JobId = jobId;
+            _backgroundJobClient.ContinueJobWith(jobId, () => ScheduleChoreReminderAsync(choreId, reminderInterval));
         }
 
         protected virtual void Dispose(bool disposing)
@@ -56,6 +80,7 @@ namespace CalendarSystem
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
     }
 
     public static class SerivceCollector

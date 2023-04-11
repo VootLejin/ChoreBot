@@ -13,7 +13,8 @@ namespace ChatClient.Commands
     internal class AddChoreCommand : BaseDiscordCommand
     {
         private const int targetArguementIndex = 0;
-        private const int messageArguementIndex = 1;
+        private const int dueTimeArgumentIndex = 1;
+        private const int messageArguementIndex = 2;
         private readonly IChoreService _choreService;
 
         public AddChoreCommand(IChoreService choreService)
@@ -43,6 +44,14 @@ namespace ChatClient.Commands
             addChoreCommandBuilder.WithDescription(Description);
             addChoreCommandBuilder.AddOptions(targetCommandOptionBuilder, messageOptionBuilder);
 
+            SlashCommandOptionBuilder dueTimeOptionBuilder = new();
+            dueTimeOptionBuilder.WithName("due_time");
+            dueTimeOptionBuilder.WithType(ApplicationCommandOptionType.String);
+            dueTimeOptionBuilder.WithDescription("The due time for the chore. Format DD-MM-YYYY HH:mm");
+            dueTimeOptionBuilder.WithRequired(true); // Only add this if you want it to be required
+            addChoreCommandBuilder.AddOption(dueTimeOptionBuilder);
+
+
             return addChoreCommandBuilder.Build();
         }
 
@@ -63,9 +72,31 @@ namespace ChatClient.Commands
 
             //if message present send it as well
             string messageArgument = ExtractChoreDescription(options);
-            await _choreService.AddChoreAsync(userNameToMention, messageArgument, command.ChannelId.Value);
+            DateTimeOffset dueTime = ExtractChoreDueTime(options);
+            if(dueTime < DateTimeOffset.Now)
+            {
+                await command.RespondAsync($"Due time must be in the future.");
+                return;
+            }
+
+            await _choreService.AddChoreAsync(userNameToMention, messageArgument, command.ChannelId.Value, dueTime);
 
             await command.RespondAsync($"chore added for {discordUser.Username}");
+        }
+
+        private DateTimeOffset ExtractChoreDueTime(List<SocketSlashCommandDataOption> options)
+        {
+
+            string dueTimeString = (string)options[dueTimeArgumentIndex].Value ?? string.Empty;
+
+            if (DateTimeOffset.TryParse(dueTimeString, out DateTimeOffset dueTime))
+            {
+                return dueTime;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid due time format.");
+            }
         }
 
         private async Task<IUser?> FindDiscordUserAsync(string userTarget, SocketSlashCommand command)
