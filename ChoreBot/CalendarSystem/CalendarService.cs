@@ -23,6 +23,12 @@ namespace CalendarSystem
 
         public async Task ScheduleChoreAsync(Chore choreToSchedule)
         {
+            if (choreToSchedule.Complete)
+            {
+                await _choreService.Value.RemoveChore(choreToSchedule);
+                return;
+            }
+
             var id = choreToSchedule.Id;
             //_backgroundJobClient.Enqueue(() => _choreService.Value.RemindAsync(id));
             var jobId = _backgroundJobClient.Schedule(() => _choreService.Value.RemindAsync(id), choreToSchedule.DueTime);

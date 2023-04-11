@@ -28,5 +28,6 @@ namespace Core
         public DateTimeOffset DueTime { get; set; }
         public string JobId { get; set; }
         public bool Complete { get; set; }
+        public ulong? MessageId { get; set; }
     }
 }

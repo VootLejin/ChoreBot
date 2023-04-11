@@ -9,5 +9,6 @@ namespace Core.Interfaces
     public interface IChatClient
     {
         Task SendMessageAsync(string assignee, string description, ulong channelId);
+        Task SendChoreMessageAsync(Chore choreToRemind);
     }
 }

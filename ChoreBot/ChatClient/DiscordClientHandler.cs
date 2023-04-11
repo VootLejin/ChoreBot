@@ -26,7 +26,7 @@ namespace ChatClient
 
         private async Task OnChoreEnded(object sender, ChoreEndDetails endDetails)
         {
-            var user =endDetails.User;
+            var user = endDetails.User;
             var channelId = endDetails.ChannelId;
 
             var channel = _client.GetChannel(channelId) as IMessageChannel;

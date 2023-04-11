@@ -1,4 +1,5 @@
 ﻿using ChatClient.Commands;
+using Core;
 using Core.Interfaces;
 using Discord;
 using Discord.Commands;
@@ -7,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Reflection;
+using System.Threading.Channels;
 using System.Windows.Input;
 
 namespace ChatClient
@@ -68,6 +70,7 @@ namespace ChatClient
 
 
             await _client.StartAsync();
+            _client.ButtonExecuted += OnButtonClick;
 
             // Wait infinitely so your bot actually stays connected.
             //await Task.Delay(Timeout.Infinite);
@@ -150,6 +153,61 @@ namespace ChatClient
         {
             var channel = await _client.GetChannelAsync(channelId) as IMessageChannel;
             await channel.SendMessageAsync($"{assignee} {description}");
+        }
+
+        private async Task OnButtonClick(SocketMessageComponent component)
+        {
+            var customId = component.Data.CustomId;
+            var commandData = customId.Split(':');
+
+            if (commandData[0] == "complete_chore" && Guid.TryParse(commandData[1], out Guid choreId))
+            {
+                await component.RespondAsync($"{component.User.Username} completed the chore! :D", ephemeral: true);
+                //await _services.GetService<IChoreService>().EndChoreAsync(component.User.Username, component.Channel.Id);
+                await _services.GetService<IChoreService>().EndChoreAsync(choreId);
+
+                // Create a new button with the same properties but set it to disabled
+                var disabledButton = new ButtonBuilder()
+                    .WithLabel("Chore Completed!")
+                    .WithStyle(ButtonStyle.Success)
+                    .WithCustomId($"complete_chore:{choreId}")
+                    .WithDisabled(true);
+
+                // Replace the existing button with the disabled one
+                var messageComponents = new ComponentBuilder()
+                    .WithButton(disabledButton)
+                    .Build();
+
+                await component.Message.ModifyAsync(msg => msg.Components = messageComponents);
+            }
+        }
+
+        public async Task SendChoreMessageAsync(Chore choreToRemind)
+        {
+            var channel = await _client.GetChannelAsync(choreToRemind.ChannelId) as IMessageChannel;
+
+            var button = new ButtonBuilder()
+                .WithLabel("Mark as Completed")
+                .WithStyle(ButtonStyle.Success)
+                .WithCustomId($"complete_chore:{choreToRemind.Id}");
+
+            var messageComponents = new ComponentBuilder()
+                .WithButton(button)
+                .Build();
+
+            var message = await channel.SendMessageAsync($"{choreToRemind.Assignee} {choreToRemind.Description}", components: messageComponents);
+            
+            // Remove old message
+            if(choreToRemind.MessageId != null)
+            {
+                var oldMessage = await channel.GetMessageAsync(message.Id) as IUserMessage;
+                if(oldMessage != null)
+                {
+                    await oldMessage.DeleteAsync();
+                    //await message.ModifyAsync(msg => msg.Components = new ComponentBuilder().Build());
+                }
+            }
+            choreToRemind.MessageId = message.Id;
         }
     }
 }

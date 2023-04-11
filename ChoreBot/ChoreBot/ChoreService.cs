@@ -2,6 +2,7 @@
 using Core;
 using Core.Interfaces;
 using Discord;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,8 @@ namespace ChoreBot
             {
                 return;
             }
-            await _chatClient.SendMessageAsync(choreToRemind.Assignee, choreToRemind.Description, choreToRemind.ChannelId);
+
+            await _chatClient.SendChoreMessageAsync(choreToRemind);
         }
 
         public async Task EndChoreAsync(string user, ulong channelId)
@@ -54,6 +56,18 @@ namespace ChoreBot
                 return;
             }
             OnChoreEnded(new ChoreEndDetails { User = user, ChannelId = channelId});
+            choreToRemind.Complete = true;
+        }
+
+
+        public async Task EndChoreAsync(Guid choreId)
+        {
+            var choreToRemind = _choreRepo.Find(c => c.Id == choreId);
+            if (choreToRemind == null)
+            {
+                return;
+            }
+            //OnChoreEnded(new ChoreEndDetails { User = choreToRemind.Assignee, ChannelId = choreToRemind.ChannelId });
             choreToRemind.Complete = true;
         }
 
