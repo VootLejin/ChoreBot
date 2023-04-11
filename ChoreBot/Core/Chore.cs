@@ -19,13 +19,13 @@ namespace Core
 
         public Guid Id { get; }
 
-        public string Assignee { get; set; }
+        public string Assignee { get; }
 
-        public string Description { get; set; }
+        public string Description { get; }
 
-        public ulong ChannelId { get; private set; }
+        public ulong ChannelId { get; }
 
-        public DateTimeOffset DueTime { get; set; }
+        public DateTimeOffset DueTime { get; }
         public string JobId { get; set; }
         public bool Complete { get; set; }
         public ulong? MessageId { get; set; }

@@ -149,12 +149,6 @@ namespace ChatClient
             }
         }
 
-        public async Task SendMessageAsync(string assignee, string description, ulong channelId)
-        {
-            var channel = await _client.GetChannelAsync(channelId) as IMessageChannel;
-            await channel.SendMessageAsync($"{assignee} {description}");
-        }
-
         private async Task OnButtonClick(SocketMessageComponent component)
         {
             var customId = component.Data.CustomId;
@@ -182,7 +176,7 @@ namespace ChatClient
             }
         }
 
-        public async Task SendChoreMessageAsync(Chore choreToRemind)
+        public async Task SendChoreReminderAsync(Chore choreToRemind)
         {
             var channel = await _client.GetChannelAsync(choreToRemind.ChannelId) as IMessageChannel;
 

@@ -15,7 +15,7 @@ namespace Core.Interfaces
         Task EndChoreAsync(string user, ulong channelId);
         Task EndChoreAsync(Guid choreId);
         event EventHandler<ChoreEndDetails> ChoreEnded;
-        Task RemoveChore(Chore choreToRemove);
+        Task RemoveChoreAsync(Chore choreToRemove);
         Task<Chore> GetChoreAsync(Guid choreId);
     }
 }

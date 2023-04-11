@@ -45,7 +45,7 @@ namespace ChoreBot
                 return;
             }
 
-            await _chatClient.SendChoreMessageAsync(choreToRemind);
+            await _chatClient.SendChoreReminderAsync(choreToRemind);
         }
 
         public async Task EndChoreAsync(string user, ulong channelId)
@@ -76,7 +76,7 @@ namespace ChoreBot
             ChoreEnded?.Invoke(this, choreEndDetails);
         }
 
-        public async Task RemoveChore(Chore choreToRemove)
+        public async Task RemoveChoreAsync(Chore choreToRemove)
         {
             _choreRepo?.Remove(choreToRemove);
         }

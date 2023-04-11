@@ -25,7 +25,7 @@ namespace CalendarSystem
         {
             if (choreToSchedule.Complete)
             {
-                await _choreService.Value.RemoveChore(choreToSchedule);
+                await _choreService.Value.RemoveChoreAsync(choreToSchedule);
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace CalendarSystem
 
             if (choreToSchedule.Complete)
             {
-                await _choreService.Value.RemoveChore(choreToSchedule);
+                await _choreService.Value.RemoveChoreAsync(choreToSchedule);
                 return;
             }
             var id = choreToSchedule.Id;
